@@ -32,17 +32,23 @@ def blight_model():
     X = pd.merge(X_cat, X_num, how='inner', left_index=True, right_index=True)
     y = df_train.loc[:, 'compliance']
     
+    
+    
     from sklearn.model_selection import train_test_split
     X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.75, random_state=0)
 
+    
+    
     from sklearn.tree import DecisionTreeClassifier
     clf = DecisionTreeClassifier(max_depth = 4, min_samples_leaf = 8, random_state = 0).fit(X_train, y_train)
 
     feat_imp = pd.DataFrame({'Feature': list(X.columns),
                              'Importance': list(clf.feature_importances_)}).sort_values(by='Importance', ascending=False)
 
+    
     N=5
     topN_features = list(pd.Series(feat_imp['Feature'][0:N]))
+    
     
     from sklearn.ensemble import RandomForestClassifier
 
@@ -51,6 +57,7 @@ def blight_model():
 
     clf_rf = RandomForestClassifier(n_estimators=100, max_depth=5, random_state=0).fit(X_train, y_train)
     
+    
     from sklearn.metrics import confusion_matrix
 
     y_pred = clf_rf.predict(X_test)
@@ -58,6 +65,7 @@ def blight_model():
     y_prob = np.hsplit(y_prob_rf, 2)[1]
 
     confusion = confusion_matrix(y_test, y_pred)
+    
     
     X_ = df_test.loc[:, ['ticket_id', 'agency_name', 'violation_street_number', 
        'violation_street_name', 'violation_zip_code', 'mailing_address_str_number',
@@ -77,6 +85,8 @@ def blight_model():
     X_cat_ = pd.get_dummies(X_cat_)
     X_num_ = X_.loc[:, numeric_data]
 
+    
+    
     X_ = pd.merge(X_cat_, X_num_, how='inner', left_index=True, right_index=True)
 
     X_top_test = X_.loc[:, topN_features]
